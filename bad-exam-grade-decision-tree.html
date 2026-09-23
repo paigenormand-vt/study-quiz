@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>So, you got a bad grade on an exam...</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    --bg: #E7ECF0;
+    --surface: #F6F8FA;
+    --ink: #1E2227;
+    --ink-soft: #4F5864;
+    --maroon: #861F41;
+    --maroon-text: #861F41;
+    --orange: #E5751F;
+    --line: #C9D1D9;
+    --note-student: #FFE27A;
+    --note-advice: #BCE5D0;
+    --note-kind: #F7C7D3;
+    --note-ink: #1E2227;
+    --shadow: 0 1px 1px rgba(30, 34, 39, .12), 0 8px 14px -8px rgba(30, 34, 39, .35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171A1F;
+      --surface: #20242A;
+      --ink: #E8EBEE;
+      --ink-soft: #A9B1BB;
+      --maroon-text: #E48AA8;
+      --line: #343A42;
+      --note-student: #E9CE68;
+      --note-advice: #A3D3BC;
+      --note-kind: #E7B2C0;
+      --shadow: 0 1px 1px rgba(0, 0, 0, .4), 0 10px 16px -8px rgba(0, 0, 0, .7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171A1F;
+    --surface: #20242A;
+    --ink: #E8EBEE;
+    --ink-soft: #A9B1BB;
+    --maroon-text: #E48AA8;
+    --line: #343A42;
+    --note-student: #E9CE68;
+    --note-advice: #A3D3BC;
+    --note-kind: #E7B2C0;
+    --shadow: 0 1px 1px rgba(0, 0, 0, .4), 0 10px 16px -8px rgba(0, 0, 0, .7);
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 3rem;
+  }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    min-height: 2.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .topbar .title {
+    font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    font-weight: 600;
+    color: var(--maroon-text);
+    font-size: 1rem;
+  }
+  .controls { display: flex; gap: .5rem; }
+  .link-btn {
+    font: inherit;
+    font-size: .95rem;
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: .35rem .9rem;
+    cursor: pointer;
+  }
+  .link-btn:hover { border-color: var(--ink-soft); }
+
+  /* Trail of answers */
+  .trail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin: 0 0 1.75rem;
+    padding: 0;
+    list-style: none;
+  }
+  .trail li {
+    font-size: .85rem;
+    line-height: 1.3;
+    background: var(--note-student);
+    color: var(--note-ink);
+    padding: .3rem .55rem;
+    max-width: 16rem;
+    box-shadow: 0 1px 1px rgba(0,0,0,.15);
+  }
+  .trail li:nth-child(even) { transform: rotate(.8deg); }
+  .trail li:nth-child(odd) { transform: rotate(-.8deg); }
+
+  h1, h2 {
+    font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -.01em;
+    margin: 0;
+  }
+  h1 {
+    font-size: clamp(2.3rem, 7vw, 3.6rem);
+    line-height: 1.05;
+    color: var(--maroon-text);
+    max-width: 14ch;
+  }
+  h2 {
+    font-size: clamp(1.6rem, 4.5vw, 2.25rem);
+    line-height: 1.15;
+    max-width: 24ch;
+  }
+  h1:focus, h2:focus { outline: none; }
+  .lede { color: var(--ink-soft); max-width: 36rem; margin: 1rem 0 2rem; }
+  .sub { color: var(--ink-soft); margin: .6rem 0 0; }
+
+  /* Sticky notes */
+  .notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: 1.1rem;
+    margin: 1.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .note {
+    display: block;
+    width: 100%;
+    min-height: 8.5rem;
+    text-align: left;
+    font: inherit;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    color: var(--note-ink);
+    background: var(--note-student);
+    border: 0;
+    padding: 1.1rem 1.1rem 1.4rem;
+    box-shadow: var(--shadow);
+    transform: rotate(var(--tilt, 0deg));
+  }
+  button.note { cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }
+  button.note:hover { transform: rotate(0deg) translateY(-3px); }
+  .notes > li:nth-child(3n+1) .note { --tilt: -1.2deg; }
+  .notes > li:nth-child(3n+2) .note { --tilt: .9deg; }
+  .notes > li:nth-child(3n) .note { --tilt: -.4deg; }
+  .note.advice { background: var(--note-advice); min-height: 0; }
+  .note.kind { background: var(--note-kind); min-height: 0; }
+  .yesno { grid-template-columns: repeat(2, minmax(0, 12rem)); }
+  .yesno .note {
+    min-height: 7rem;
+    font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+  }
+  .advice-list { grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
+
+  .also { margin-top: 2.5rem; }
+  .also h3 {
+    font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin: 0;
+  }
+  .also .notes { margin-top: 1rem; }
+
+  .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2.5rem; }
+  .btn {
+    font: inherit;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: .8rem 1.4rem;
+    cursor: pointer;
+    border: 2px solid var(--maroon);
+    background: var(--maroon);
+    color: #fff;
+  }
+  .btn:hover { background: #6d1935; border-color: #6d1935; }
+  .btn.secondary { background: transparent; color: var(--maroon-text); border-color: var(--maroon-text); }
+  .btn.secondary:hover { background: var(--surface); }
+
+  .credit { margin-top: 3rem; font-size: .9rem; color: var(--ink-soft); }
+
+  button:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 3px;
+  }
+
+  .screen { animation: arrive .25s ease-out; }
+  @keyframes arrive { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  @media (max-width: 30rem) {
+    .notes, .advice-list { grid-template-columns: 1fr; }
+    .yesno { grid-template-columns: 1fr 1fr; }
+    .note { min-height: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .screen { animation: none; }
+    button.note { transition: none; }
+    button.note:hover { transform: rotate(var(--tilt, 0deg)); }
+  }
+  @media print {
+    .controls, .actions, .trail { display: none; }
+    .note { box-shadow: none; border: 1px solid #999; transform: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <span class="title" id="topTitle"></span>
+    <div class="controls" id="controls" hidden>
+      <button class="link-btn" id="backBtn" type="button">Back</button>
+      <button class="link-btn" id="restartBtn" type="button">Start over</button>
+    </div>
+  </header>
+  <ol class="trail" id="trail" aria-label="Your answers so far"></ol>
+  <main id="app" aria-live="polite"></main>
+</div>
+
+<script>
+/* ------------------------------------------------------------------
+   ADVICE TEXT
+   Every recommendation from the flowchart, written once so it can
+   appear on more than one path. "kind" notes are encouragement
+   rather than a strategy and get a different color.
+------------------------------------------------------------------- */
+const ADVICE = {
+  startEarly:   { text: "Next time, start studying and reviewing way before the exam. At least a week ahead, for at least 20 minutes a day." },
+  refine:       { text: "Refine your study methods. Make sure you're focusing on things you don't know and things your professor explicitly says will be on your exam." },
+  studyGuides:  { text: "Use homework, quizzes, and assignments as study guides for your exam." },
+  vtResources:  { text: "Utilize VT resources: Tutoring Centers, Writing Center, etc." },
+  officeHours:  { text: "Attend your professor's and TA's office hours frequently. Come with specific questions about the subject material." },
+  feedback:     { text: "Read the feedback your professor leaves on assignments, and review correct answers when they're posted." },
+  askNotEnough: { text: "Great! But this alone isn't enough. Are you studying? Paying attention? Completing assignments and reading feedback?" },
+  ssd:          { text: "SSD can help! If you think you need accommodations like extra time or a different testing location, talk to SSD and/or your professor." },
+  askInClass:   { text: "Ask questions in class or immediately after class." },
+  paper:        { text: "Take notes on paper when possible, and put your computer away!" },
+  friends:      { text: "Sit away from your friends if they're a distraction." },
+  front:        { text: "Sit closer to the front of the class." },
+  screenTime:   { text: "Use screen time apps and Do Not Disturb, turn off your notifications, and/or put your phone in your bag." },
+  counseling:   { text: "There are people who can help! Contact Cook Counseling Center and/or SSD." },
+  advisor:      { text: "Maybe it's time for a switch! Talk to your advisor about your academic options." },
+  okay:         { kind: true, text: "That's okay! College is hard! This grade doesn't define you or your intelligence. It is just an event that can spark change. Learn from this experience, and make changes so that next time you get a grade you're proud of!" }
+};
+
+/* ------------------------------------------------------------------
+   THE DECISION TREE
+   type "question": yes/no.  "short" is the label used in the trail.
+   type "choice":   pick the statement that fits.
+   type "result":   shows advice. Optional "next" continues the path;
+                    optional "more" offers extra statements to pick.
+------------------------------------------------------------------- */
+const TREE = {
+  start: {
+    type: "start",
+    title: "So, you got a bad grade on an exam...",
+    body: "Answer a few questions about how you prepared, and you'll get specific things to try before the next one.",
+    next: "prepared"
+  },
+
+  prepared: {
+    type: "question",
+    prompt: "I thought I was well prepared for this exam.",
+    sub: "Is that true for you?",
+    short: "I felt prepared",
+    yes: "whyPrepared",
+    no: "whyNot"
+  },
+
+  whyPrepared: {
+    type: "choice",
+    prompt: "Why did you feel prepared?",
+    sub: "Pick the one that fits best.",
+    options: [
+      { text: "I have been going to class every day.", next: "attention" },
+      { text: "I studied for hours!", next: "nightBefore" },
+      { text: "I have been doing well on past assignments.", next: "doingWell" },
+      { text: "I ask questions in class.", next: "askQuestions" },
+      { text: "I was well-prepared and knew the content but I ran out of time or couldn't focus during the exam.", next: "examTime" },
+      { text: "I did everything right and I still failed.", next: "everythingRight" }
+    ]
+  },
+
+  whyNot: {
+    type: "choice",
+    prompt: "Why didn't you feel prepared?",
+    sub: "Pick the one that fits best.",
+    options: [
+      { text: "Honestly, I didn't feel like studying.", next: "noStudy" },
+      { text: "The class is too hard. I didn't understand anything!", next: "tooHard" }
+    ]
+  },
+
+  noStudy: {
+    type: "choice",
+    prompt: "Honestly, I didn't feel like studying.",
+    sub: "Which of these sounds more like you?",
+    options: [
+      { text: "I don't care about the things I am learning in my major and my classes.", next: "changeMajor" },
+      { text: "I don't feel motivated to do much of anything anymore.", next: "noMotivation" }
+    ]
+  },
+
+  attention: {
+    type: "question",
+    prompt: "Are you paying attention in class?",
+    short: "Paying attention in class",
+    yes: "attentionYes",
+    no: "notAttending"
+  },
+
+  attentionYes: {
+    type: "result",
+    advice: ["officeHours", "studyGuides"],
+    next: "nightBefore"
+  },
+
+  nightBefore: {
+    type: "question",
+    prompt: "Did you start studying the night before the exam?",
+    short: "Started the night before",
+    yes: "startEarly",
+    no: "refine"
+  },
+
+  startEarly:      { type: "result", advice: ["startEarly"] },
+  refine:          { type: "result", advice: ["refine", "studyGuides", "vtResources"], next: "attention" },
+  doingWell:       { type: "result", advice: ["officeHours", "vtResources", "feedback"] },
+  askQuestions:    { type: "result", advice: ["askNotEnough"] },
+  everythingRight: { type: "result", advice: ["okay"] },
+
+  examTime: {
+    type: "result",
+    advice: ["ssd"],
+    more: [{ text: "The classroom doesn't help me focus.", next: "classroom" }]
+  },
+
+  tooHard: {
+    type: "result",
+    advice: ["okay", "officeHours", "askInClass", "studyGuides"],
+    more: [{ text: "Honestly, I am not paying attention in class.", next: "notAttending" }]
+  },
+
+  notAttending: {
+    type: "choice",
+    prompt: "Honestly, I am not paying attention in class.",
+    sub: "What's getting in the way?",
+    options: [
+      { text: "The classroom doesn't help me focus.", next: "classroom" },
+      { text: "I am always on my phone.", next: "phone" },
+      { text: "I have a hard time focusing in all of my classes due to something personal happening in my life.", next: "personal" }
+    ]
+  },
+
+  classroom:    { type: "result", advice: ["paper", "friends", "front"] },
+  phone:        { type: "result", advice: ["screenTime"] },
+  personal:     { type: "result", advice: ["counseling"] },
+  changeMajor:  { type: "result", advice: ["advisor"] },
+  noMotivation: { type: "result", advice: ["counseling"] },
+
+  plan: { type: "plan" }
+};
+
+/* ------------------------------------------------------------------
+   STATE: a stack of { id, answer }. "answer" is what the student
+   picked to leave that step (shown in the trail).
+------------------------------------------------------------------- */
+let path = [{ id: "start", answer: null }];
+
+const app = document.getElementById("app");
+const trail = document.getElementById("trail");
+const controls = document.getElementById("controls");
+const topTitle = document.getElementById("topTitle");
+
+const current = () => path[path.length - 1];
+const visited = id => path.some(step => step.id === id);
+
+function go(nextId, answerLabel) {
+  current().answer = answerLabel;
+  path.push({ id: nextId, answer: null });
+  render();
+}
+
+function back() {
+  if (path.length > 1) {
+    path.pop();
+    current().answer = null;
+    render();
+  }
+}
+
+function restart() {
+  path = [{ id: "start", answer: null }];
+  render();
+}
+
+/* All advice collected along the path, in order, without repeats */
+function collectedAdvice() {
+  const seen = [];
+  path.forEach(step => {
+    const node = TREE[step.id];
+    if (node.type === "result") {
+      node.advice.forEach(key => { if (!seen.includes(key)) seen.push(key); });
+    }
+  });
+  return seen;
+}
+
+function el(tag, attrs = {}, children = []) {
+  const node = document.createElement(tag);
+  Object.entries(attrs).forEach(([k, v]) => {
+    if (k === "text") node.textContent = v;
+    else if (k === "onclick") node.addEventListener("click", v);
+    else node.setAttribute(k, v);
+  });
+  [].concat(children).forEach(c => c && node.appendChild(c));
+  return node;
+}
+
+function noteButton(text, onClick) {
+  return el("li", {}, el("button", { class: "note", type: "button", text, onclick: onClick }));
+}
+
+function adviceNotes(keys) {
+  return el("ul", { class: "notes advice-list" },
+    keys.map(key => el("li", {}, el("div", {
+      class: "note " + (ADVICE[key].kind ? "kind" : "advice"),
+      text: ADVICE[key].text
+    })))
+  );
+}
+
+function renderTrail() {
+  trail.innerHTML = "";
+  path.forEach(step => {
+    const node = TREE[step.id];
+    if (!step.answer) return;
+    if (node.type === "question") {
+      trail.appendChild(el("li", { text: `${node.short}: ${step.answer}` }));
+    } else if (node.type === "choice" || (node.type === "result" && step.answer !== "Keep going")) {
+      if (step.answer !== "See my game plan") trail.appendChild(el("li", { text: step.answer }));
+    }
+  });
+  trail.hidden = trail.children.length === 0;
+}
+
+function render() {
+  const step = current();
+  const node = TREE[step.id];
+  app.innerHTML = "";
+  controls.hidden = step.id === "start";
+  topTitle.textContent = step.id === "start" ? "" : "So, you got a bad grade on an exam...";
+  renderTrail();
+
+  const screen = el("section", { class: "screen" });
+  let heading;
+
+  if (node.type === "start") {
+    heading = el("h1", { tabindex: "-1", text: node.title });
+    screen.append(
+      heading,
+      el("p", { class: "lede", text: node.body }),
+      el("button", { class: "btn", type: "button", text: "Start", onclick: () => go(node.next, null) }),
+      el("p", { class: "credit", text: "Decision tree by Aaliyah Royster" })
+    );
+  }
+
+  if (node.type === "question") {
+    heading = el("h2", { tabindex: "-1", text: node.prompt });
+    screen.append(heading);
+    if (node.sub) screen.append(el("p", { class: "sub", text: node.sub }));
+    screen.append(el("ul", { class: "notes yesno" }, [
+      noteButton("Yes", () => go(node.yes, "Yes")),
+      noteButton("No", () => go(node.no, "No"))
+    ]));
+  }
+
+  if (node.type === "choice") {
+    heading = el("h2", { tabindex: "-1", text: node.prompt });
+    screen.append(heading);
+    if (node.sub) screen.append(el("p", { class: "sub", text: node.sub }));
+    screen.append(el("ul", { class: "notes" },
+      node.options.map(opt => noteButton(opt.text, () => go(opt.next, opt.text)))
+    ));
+  }
+
+  if (node.type === "result") {
+    const canContinue = node.next && !visited(node.next);
+    const more = (node.more || []).filter(opt => !visited(opt.next));
+    const earlier = collectedAdvice().filter(key => !node.advice.includes(key));
+
+    heading = el("h2", { tabindex: "-1", text: canContinue ? "Try this" : "Here's what to try" });
+    screen.append(heading, adviceNotes(node.advice));
+
+    if (more.length) {
+      screen.append(el("div", { class: "also" }, [
+        el("h3", { text: "Does this also sound like you?" }),
+        el("ul", { class: "notes" }, more.map(opt => noteButton(opt.text, () => go(opt.next, opt.text))))
+      ]));
+    }
+
+    const actions = el("div", { class: "actions" });
+    if (canContinue) {
+      actions.append(el("button", { class: "btn", type: "button", text: "Keep going", onclick: () => go(node.next, "Keep going") }));
+    } else if (earlier.length) {
+      actions.append(el("button", { class: "btn", type: "button", text: "See my game plan", onclick: () => go("plan", "See my game plan") }));
+    } else {
+      actions.append(el("button", { class: "btn secondary", type: "button", text: "Start over", onclick: restart }));
+    }
+    screen.append(actions);
+  }
+
+  if (node.type === "plan") {
+    heading = el("h2", { tabindex: "-1", text: "Your game plan" });
+    screen.append(
+      heading,
+      el("p", { class: "sub", text: "Everything from your path, in one place." }),
+      adviceNotes(collectedAdvice()),
+      el("div", { class: "actions" }, [
+        el("button", { class: "btn", type: "button", text: "Print my plan", onclick: () => window.print() }),
+        el("button", { class: "btn secondary", type: "button", text: "Start over", onclick: restart })
+      ])
+    );
+  }
+
+  app.appendChild(screen);
+  if (heading && path.length > 1) heading.focus();
+  window.scrollTo({ top: 0 });
+}
+
+document.getElementById("backBtn").addEventListener("click", back);
+document.getElementById("restartBtn").addEventListener("click", restart);
+render();
+</script>
+</body>
+</html>
